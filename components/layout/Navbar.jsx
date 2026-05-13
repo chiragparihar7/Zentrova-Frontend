@@ -1,15 +1,39 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { FiBell, FiSearch, FiMenu } from "react-icons/fi";
 
 export default function Navbar({ setIsOpen }) {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) return;
+
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await res.json();
+      setUser(data);
+    };
+
+    fetchUser();
+  }, []);
+
   return (
     <div className="w-full h-16 flex items-center justify-between px-4 md:px-6 
     bg-background border-b border-border sticky top-0 z-40">
 
       {/* LEFT */}
       <div className="flex items-center gap-3">
-        {/* MOBILE MENU BUTTON */}
         <FiMenu
           className="md:hidden text-xl cursor-pointer"
           onClick={() => setIsOpen(true)}
@@ -43,14 +67,17 @@ export default function Navbar({ setIsOpen }) {
           <FiBell />
         </div>
 
+        {/* USER */}
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-primary text-white flex items-center justify-center">
-            C
+            {user?.name?.charAt(0) || "U"}
           </div>
 
           <div className="hidden md:block">
-            <p className="text-sm">Chirag</p>
-            <p className="text-xs text-muted">Admin</p>
+            <p className="text-sm">{user?.name || "User"}</p>
+            <p className="text-xs text-muted">
+              {user?.role || "Member"}
+            </p>
           </div>
         </div>
 
